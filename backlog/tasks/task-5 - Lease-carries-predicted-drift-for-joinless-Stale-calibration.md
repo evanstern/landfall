@@ -22,9 +22,9 @@ Derived from Analysis-Using-The-Prior-Art; resolves the DESIGN.md open question 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Lease records predicted drift at checkout; Land outcomes expose predicted vs actual without a join
-- [ ] #2 TestVerdictReproducible extended to the new field(s)
-- [ ] #3 go test -race ./... passes
+- [x] #1 Lease records predicted drift at checkout; Land outcomes expose predicted vs actual without a join
+- [x] #2 TestVerdictReproducible extended to the new field(s)
+- [x] #3 go test -race ./... passes
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -36,6 +36,12 @@ Derived from Analysis-Using-The-Prior-Art; resolves the DESIGN.md open question 
 4. Update DESIGN.md lifecycle + resolve the open question.
 5. go test -race ./...; one branch, one PR (task-5-lease-predicted-drift).
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Implemented on branch task-5-lease-predicted-drift; merged as PR #4 (https://github.com/evanstern/landfall/pull/4). Lease gains PredictedDrift via pure Checkout(verdict, gen); Land returns a self-contained Landing record pairing predicted vs actual drift. TestLandingReproducible added; TestVerdictReproducible extended through Checkout. DESIGN.md open question resolved; README example updated. go test -race ./... passes on main.
+<!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
