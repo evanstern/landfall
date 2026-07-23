@@ -1,10 +1,10 @@
 ---
 id: TASK-5
 title: Lease carries predicted drift for joinless Stale calibration
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-07-23 04:28'
-updated_date: '2026-07-23 05:14'
+updated_date: '2026-07-23 05:17'
 labels: []
 dependencies: []
 references:
@@ -36,3 +36,9 @@ Derived from Analysis-Using-The-Prior-Art; resolves the DESIGN.md open question 
 4. Update DESIGN.md lifecycle + resolve the open question.
 5. go test -race ./...; one branch, one PR (task-5-lease-predicted-drift).
 <!-- SECTION:PLAN:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Lease now carries the gate's predicted drift, resolving the DESIGN.md open question. Checkout(verdict, gen) freezes class, effective budget, and predicted drift into the lease (the OCC read set); Land returns a Landing record pairing predicted vs actual drift, so Stale calibration needs no join back to the verdict log. Landing is reproducible from its own fields (TestLandingReproducible); TestVerdictReproducible extended through Checkout; Land stays pure. Merged in PR #4.
+<!-- SECTION:FINAL_SUMMARY:END -->
