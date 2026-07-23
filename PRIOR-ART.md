@@ -1,5 +1,20 @@
 # Prior art & formalization survey
 
+## Decision: publish, don't patent (2026-07-23)
+
+Acting on the patentability read below, the project takes the
+**defensive-disclosure path**: the pattern is published as a named
+engineering pattern in [PATTERN.md](PATTERN.md) (first public commit
+2026-07-23), and **no patent will be sought**. Rationale: a broad claim
+carries high §103 obviousness risk and nontrivial §101 exposure, while a
+narrow five-element claim would be easy to design around; naming and
+publishing first — the circuit-breaker precedent — is the stronger
+position, and the converging 2025–2026 literature makes it time-sensitive.
+Publication knowingly burns patent optionality (statutory clocks start at
+disclosure); that trade was accepted with the caveat that the survey below
+is a keyword search with an 18-month application blind spot, not a
+professional clearance search.
+
 Deep-research sweep run 2026-07-23 (web + Google Patents) asking two
 questions: has this pattern been formalized, and is it patentable? Research
 context, **not legal advice**; patent keyword search is not a professional
