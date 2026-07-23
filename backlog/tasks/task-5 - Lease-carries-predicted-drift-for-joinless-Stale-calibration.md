@@ -1,9 +1,10 @@
 ---
 id: TASK-5
 title: Lease carries predicted drift for joinless Stale calibration
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-07-23 04:28'
+updated_date: '2026-07-23 05:14'
 labels: []
 dependencies: []
 references:
@@ -25,3 +26,13 @@ Derived from Analysis-Using-The-Prior-Art; resolves the DESIGN.md open question 
 - [ ] #2 TestVerdictReproducible extended to the new field(s)
 - [ ] #3 go test -race ./... passes
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add PredictedDrift to Lease; add pure Checkout(Verdict, gen) freezing Class, EffectiveBudget, PredictedDrift at launch.
+2. Land returns a Landing record (Outcome + Gen/CurrentGen/Budget/PredictedDrift/ActualDrift) — self-contained, reproducible, pairs predicted vs actual with no join (OCC read-set-into-validation shape).
+3. Extend TestVerdictReproducible through Checkout; add TestLandingReproducible; update TestLeaseLand.
+4. Update DESIGN.md lifecycle + resolve the open question.
+5. go test -race ./...; one branch, one PR (task-5-lease-predicted-drift).
+<!-- SECTION:PLAN:END -->

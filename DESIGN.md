@@ -89,14 +89,20 @@ The gate is ex-ante; even an allowed call can be invalidated mid-flight.
 `Lease` is the ex-post complement (promptworld's landing ladder +
 generation-bump supersession, distilled):
 
-- Checked out at launch: world generation + the effective budget allowed against.
+- Checked out at launch (`Checkout(verdict, gen)`): world generation, the
+  effective budget allowed against, and the predicted drift the gate bet on —
+  the OCC read set, frozen into the lease.
 - Salient events bump the host's generation.
-- `Land(currentGen, actualDrift)` → `Landed | Superseded | Stale`.
+- `Land(currentGen, actualDrift)` → a `Landing` record: `Landed | Superseded
+  | Stale` plus the numbers that produced it, reproducible from its own
+  fields like a `Verdict`.
 - Supersession trumps staleness. Every outcome is recorded — a dropped
   answer without a trace is a mystery bug factory.
 - `Stale` means the gate's prediction was wrong. A pattern of them indicts
-  the velocity estimate or the tier calibration; predicted vs. actual drift
-  is one query over the logs.
+  the velocity estimate or the tier calibration — and because the lease
+  carries the prediction to the landing, every `Landing` pairs predicted
+  vs. actual drift in one record: the calibration report is the landing log
+  itself, no join back to the verdict log.
 
 ## Starvation
 
@@ -253,7 +259,10 @@ registration.
 
 ## Open questions
 
-- Should `Lease` carry predicted drift too, so `Stale` outcomes can log
-  predicted-vs-actual without a join?
 - Velocity estimators worth shipping as optional helpers: salient-event EWMA,
   state-hash churn/sec.
+
+Resolved: *should `Lease` carry predicted drift?* — yes. The lease is the OCC
+read set; recording the admission-time prediction in it lets every landing
+pair predicted vs. actual drift without a join (invariant 5). See the
+lifecycle section.
