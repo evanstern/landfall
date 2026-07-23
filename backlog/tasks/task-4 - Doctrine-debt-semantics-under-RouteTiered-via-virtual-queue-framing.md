@@ -4,7 +4,7 @@ title: 'Doctrine: debt semantics under RouteTiered via virtual-queue framing'
 status: In Progress
 assignee: []
 created_date: '2026-07-23 04:28'
-updated_date: '2026-07-23 05:05'
+updated_date: '2026-07-23 05:08'
 labels: []
 dependencies: []
 references:
@@ -22,9 +22,9 @@ Derived from Analysis-Using-The-Prior-Art; resolves the DESIGN.md open question 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Doctrine decided and written into DESIGN.md (open question removed)
-- [ ] #2 Route/RouteTiered tests cover the chosen cross-tier debt semantics
-- [ ] #3 go test -race ./... passes
+- [x] #1 Doctrine decided and written into DESIGN.md (open question removed)
+- [x] #2 Route/RouteTiered tests cover the chosen cross-tier debt semantics
+- [x] #3 go test -race ./... passes
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -36,3 +36,11 @@ Derived from Analysis-Using-The-Prior-Art; resolves the DESIGN.md open question 
 4. Tests: cross-tier isolation (one tier's debt never inflates another), debt pulls routing back up-tier, tiered-verdict reproducibility.
 5. go test -race ./..., PR, merge, board sync.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Doctrine implemented on branch task-4-tiered-debt-semantics; PR #3 open (https://github.com/evanstern/landfall/pull/3). Per-tier debt queues per Neely: Tier carries Debt, RouteTiered gates each tier against its own inflated budget, landed lower tier does not repay higher tier's queue. go test -race passes.
+
+Merge of PR #3 blocked by session permissions — awaiting user merge; task closes Done after merge.
+<!-- SECTION:NOTES:END -->
