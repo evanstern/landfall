@@ -1,10 +1,10 @@
 ---
 id: TASK-4
 title: 'Doctrine: debt semantics under RouteTiered via virtual-queue framing'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-07-23 04:28'
-updated_date: '2026-07-23 05:08'
+updated_date: '2026-07-23 05:09'
 labels: []
 dependencies: []
 references:
@@ -44,3 +44,9 @@ Doctrine implemented on branch task-4-tiered-debt-semantics; PR #3 open (https:/
 
 Merge of PR #3 blocked by session permissions — awaiting user merge; task closes Done after merge.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Doctrine decided and shipped in PR #3 (merged as 0c5075d): per-constraint (per-tier) debt queues per Neely's virtual-queue discipline — a landed local call does NOT repay the suppressed cloud tier's debt; a landing repays only its own tier and lower-quality tiers, bounding quality starvation as well as consultation starvation. Tier carries its own Debt, RouteTiered gates each tier against its own debt-inflated budget, gate stays pure with the chosen tier's debt recorded in the verdict. DESIGN.md open question removed (doctrine in Starvation + host obligations), PATTERN.md E4 refined, tests cover cross-tier isolation, up-tier pull, DebtFactor 0, and tiered-verdict reproducibility. go test -race ./... passes.
+<!-- SECTION:FINAL_SUMMARY:END -->
