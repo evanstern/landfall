@@ -1,0 +1,286 @@
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Cast</h1>
+      <p class="module-subtitle">Five characters run this courtroom &mdash; and your app is one of them</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A courtroom, not a casino</h2>
+        <p>landfall works like a very disciplined courtroom. There&rsquo;s a law book, a judge, and a written ruling for <em>every single case</em> &mdash; including, especially, the refusals. Nothing is decided on vibes.</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📕</div>
+            <div>
+              <strong>Class &mdash; the law book entry</strong>
+              <p>Each kind of decision is registered up front: its name, its size, its budget, and its declared fallback. Defined in <code>class.go</code>.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">⚖️</div>
+            <div>
+              <strong>Route &mdash; the judge</strong>
+              <p>A pure <span class="term" data-definition="A function is a named chunk of code that takes inputs and returns an output — like a vending machine: same button, same snack. When steering AI you can say: put that logic in its own function.">function</span> in <code>route.go</code> that applies the law book to the evidence and rules allow or refuse.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📜</div>
+            <div>
+              <strong>Verdict &mdash; the written ruling</strong>
+              <p>Not just yes/no: every number that went into the decision, plus the equation itself as a human-readable sentence.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">⏱️</div>
+            <div>
+              <strong>Estimator &mdash; the timing expert</strong>
+              <p>The one witness who learns: a live estimate of how slow the oracle currently is (<code>estimate.go</code>). Module 4 is all about it.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🏛️</div>
+            <div>
+              <strong>The host &mdash; your app, the court clerk</strong>
+              <p>landfall is a library, remember &mdash; <em>your app</em> measures the world, brings the evidence, files every ruling, and carries out the sentence.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The law book: registering a Class</h2>
+        <p>Here is the actual <span class="term" data-definition="A struct (structure) is a bundle of named fields that travel together — like one labeled index card holding all the facts about one thing.">struct</span> from <code>class.go</code>. One of these is written, reviewed, and registered for every kind of oracle-reaching decision your app makes:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">class.go</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">type</span> Class <span class="code-keyword">struct</span> {</span>
+<span class="code-line">	Name    <span class="code-keyword">string</span></span>
+<span class="code-line">	Points  <span class="code-keyword">int</span></span>
+<span class="code-line">	Budget  <span class="code-keyword">float64</span></span>
+<span class="code-line">	Degrade Degrade</span>
+<span class="code-line">	<span class="code-comment">// DebtFactor governs starvation relief: each suppressed call accrues one</span></span>
+<span class="code-line">	<span class="code-comment">// unit of debt, and the effective budget is Budget × (1 + debt×DebtFactor),</span></span>
+<span class="code-line">	<span class="code-comment">// so persistent suppression eventually admits a call. Zero means starvation</span></span>
+<span class="code-line">	<span class="code-comment">// is acceptable for this class (e.g. purely cosmetic decisions).</span></span>
+<span class="code-line">	DebtFactor <span class="code-keyword">float64</span></span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">A Class bundles everything the judge needs to know about one kind of decision.</p>
+              <p class="tl">Its name &mdash; like &ldquo;planner&rdquo; or &ldquo;autocomplete&rdquo; &mdash; so every ruling says who it was about.</p>
+              <p class="tl">Its size in points: how big an ask this is, independent of which oracle answers it. A one-liner might be 1 point; a deep analysis, 8.</p>
+              <p class="tl">Its budget: how many salient events the answer survives. A reviewed constant, never auto-tuned.</p>
+              <p class="tl">Its declared fallback for when the gate says no &mdash; more on this below.</p>
+              <p class="tl">The comments are part of the real file: they explain the fairness mechanism&hellip;</p>
+              <p class="tl">&hellip;each refusal accrues &ldquo;debt&rdquo; that inflates the budget&hellip;</p>
+              <p class="tl">&hellip;so a decision that keeps losing eventually wins one&hellip;</p>
+              <p class="tl">&hellip;and zero opts out, for decisions where starving is fine.</p>
+              <p class="tl">The knob itself &mdash; Module 5 puts numbers on it.</p>
+              <p class="tl">End of the law book entry.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>That <code>Degrade</code> field is landfall&rsquo;s quiet masterstroke. A Class <em>cannot be registered</em> without naming a legal fallback &mdash; validation fails. Four are allowed:</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🤫</div>
+            <h4 class="pattern-title">skip</h4>
+            <p class="pattern-desc">Do nothing &mdash; but <em>record</em> that nothing was done. Never silent.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🦎</div>
+            <h4 class="pattern-title">reflex</h4>
+            <p class="pattern-desc">A simple, instant, rule-based policy covers &mdash; the lizard brain that never waits.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📋</div>
+            <h4 class="pattern-title">template</h4>
+            <p class="pattern-desc">A pre-written answer stands in &mdash; authored ahead of time, always available.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏃</div>
+            <h4 class="pattern-title">faster-tier</h4>
+            <p class="pattern-desc">Retry against a quicker (smaller) oracle whose answer will land sooner.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! Graceful degradation by construction</strong>
+            <p>Most systems bolt fallbacks on after an outage embarrasses them. Here, installing the gate <em>forces the fallback to exist</em> &mdash; you literally cannot register a slow-oracle decision without declaring what happens when it&rsquo;s refused. Ask your AI tools for this: &ldquo;make the fallback a required field, not an afterthought.&rdquo;</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Watch one case get decided</h2>
+        <p>Here&rsquo;s the cast handling a real request &mdash; the &ldquo;planner&rdquo; class asking for an oracle call on a busy day. Press play:</p>
+
+        <div class="chat-window" id="chat-cast">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="app" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">🏛️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Your App (host)</span>
+                <p>World, how fast are things changing right now?</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="world" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">🌍</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">World</span>
+                <p>About 2 salient events per second. Busy day.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="app" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">🏛️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Your App (host)</span>
+                <p>Gate &mdash; the &ldquo;planner&rdquo; class wants to consult the Oracle. Worth it?</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="gate" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">⚖️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Gate (Route)</span>
+                <p>Checking the law book. Planner: 3 points, budget 5, declared fallback: reflex.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="gate" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">⚖️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Gate (Route)</span>
+                <p>The Estimator clocks this oracle at 1.5 seconds per point. 3 pt &times; 1.5 = 4.5 seconds in flight.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="gate" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">⚖️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Gate (Route)</span>
+                <p>4.5 s &times; 2 events/s = <strong>9 predicted drift &gt; budget 5. Refused.</strong> Here is the Verdict with the full arithmetic.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="app" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">🏛️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Your App (host)</span>
+                <p>Understood. Running the reflex fallback and filing the Verdict in the log.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="7" data-sender="oracle" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔮</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Oracle</span>
+                <p>&hellip;did someone need me?</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="8" data-sender="app" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">🏛️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Your App (host)</span>
+                <p>Not today &mdash; and that&rsquo;s the whole point. You&rsquo;re expensive.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" style="display:none">
+            <div class="chat-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What landfall refuses to do</h2>
+        <p>landfall is deliberately a <span class="term" data-definition="A leaf library sits at the edge of the dependency tree: it depends on nothing but the language itself, so anything can safely depend on it. Small surface, no surprises.">leaf</span> &mdash; it has zero dependencies and keeps its job tiny. Everything below is <em>your app&rsquo;s</em> responsibility, on purpose:</p>
+
+        <div class="badge-list stagger-children">
+          <div class="badge-item animate-in">
+            <code class="badge-code">velocity</code>
+            <span class="badge-desc">Measuring how fast the world changes &mdash; you estimate it outside and pass a number in</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">recording</code>
+            <span class="badge-desc">Persisting every Verdict and outcome &mdash; landfall writes rulings, you keep the archive</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">debt</code>
+            <span class="badge-desc">Counting refusals and resetting the counter after a success</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">failures</code>
+            <span class="badge-desc">Retries and outage handling belong to a <span class="term" data-definition="A circuit breaker is a safety pattern that stops calling a failing service for a while — like a fuse box — so failures do not cascade. Distinct from deciding whether an answer would be stale.">circuit breaker</span>, not the gate</span>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧩</div>
+          <div class="callout-content">
+            <strong class="callout-title">Separation of concerns</strong>
+            <p>Splitting &ldquo;decide&rdquo; from &ldquo;measure, record, and recover&rdquo; is a universal engineering move called <em>separation of concerns</em>. It keeps each piece small enough to test perfectly. When an AI assistant offers to fold everything into one clever component &mdash; that&rsquo;s the moment to push back.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Match the character to the job</h2>
+        <p>Drag each cast member onto the job description that belongs to them.</p>
+
+        <div class="dnd-container" id="dnd-cast">
+          <div class="dnd-chips">
+            <div class="dnd-chip" draggable="true" data-answer="class">Class</div>
+            <div class="dnd-chip" draggable="true" data-answer="verdict">Verdict</div>
+            <div class="dnd-chip" draggable="true" data-answer="estimator">Estimator</div>
+            <div class="dnd-chip" draggable="true" data-answer="host">Your app</div>
+          </div>
+          <div class="dnd-zones">
+            <div class="dnd-zone" data-correct="class">
+              <p class="dnd-zone-label">The law book entry: name, points, budget, and a declared fallback</p>
+              <div class="dnd-zone-target">Drop here</div>
+            </div>
+            <div class="dnd-zone" data-correct="verdict">
+              <p class="dnd-zone-label">The written ruling: the decision plus every number that produced it</p>
+              <div class="dnd-zone-target">Drop here</div>
+            </div>
+            <div class="dnd-zone" data-correct="estimator">
+              <p class="dnd-zone-label">The timing expert: a live, learning estimate of seconds-per-point</p>
+              <div class="dnd-zone-target">Drop here</div>
+            </div>
+            <div class="dnd-zone" data-correct="host">
+              <p class="dnd-zone-label">Measures world velocity, files every ruling, runs the fallback</p>
+              <div class="dnd-zone-target">Drop here</div>
+            </div>
+          </div>
+          <div class="dnd-controls">
+            <button class="btn" onclick="checkDnD('dnd-cast')">Check Matches</button>
+            <button class="btn" onclick="resetDnD('dnd-cast')">Reset</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

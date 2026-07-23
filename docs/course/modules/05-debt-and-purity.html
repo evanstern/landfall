@@ -1,0 +1,285 @@
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">Debt, Tiers &amp; the Empty Gate</h1>
+      <p class="module-subtitle">How nobody starves, how the best affordable oracle wins &mdash; and why the gate contains no AI at all</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The starvation problem</h2>
+        <p>Picture a store that rain-checks you every time an item is sold out &mdash; and each refusal makes your voucher <em>bigger</em>. Refuse you often enough and eventually your voucher is so generous that even on a packed day, you get served. That&rsquo;s <strong>suppression debt</strong>.</p>
+        <p>Why it&rsquo;s needed: if the world stays hot for hours, the Gate keeps saying no, the oracle is never consulted, and your app flatlines at fallback quality forever. Debt guarantees an eventual yes:</p>
+
+        <div class="badge-list stagger-children">
+          <div class="badge-item animate-in">
+            <code class="badge-code">debt 0 &rarr; budget 5.0</code>
+            <span class="badge-desc">Predicted drift is 9 &mdash; refused. The class accrues one unit of debt.</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">debt 1 &rarr; budget 7.5</code>
+            <span class="badge-desc">Budget 5 &times; (1 + 1 &times; 0.5) = 7.5. Still under 9 &mdash; refused again, debt grows.</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">debt 2 &rarr; budget 10.0</code>
+            <span class="badge-desc">5 &times; (1 + 2 &times; 0.5) = 10 &mdash; drift 9 now fits. <strong>Admitted.</strong> A successful landing resets the debt to zero.</span>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📈</div>
+          <div class="callout-content">
+            <strong class="callout-title">The gate stays pure</strong>
+            <p>Notice landfall doesn&rsquo;t <em>remember</em> the debt &mdash; your app counts refusals and passes the number in, and the Verdict records it. Same inputs, same ruling, always. (This is the &ldquo;fairness boost&rdquo; you glimpsed in Module 1&rsquo;s code.)</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A ladder of oracles</h2>
+        <p>Often you have several oracles for the same job: a brilliant slow cloud model, a decent quick local one. <code>RouteTiered</code> runs the gate against <em>each</em> and picks the best-quality tier whose answer would land in time:</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🐋</div>
+            <div>
+              <strong>Calm world &rarr; the big slow oracle</strong>
+              <p>Plenty of budget headroom &mdash; take the smartest answer available.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🐇</div>
+            <div>
+              <strong>Hot world &rarr; the small fast oracle</strong>
+              <p>The deep answer would land stale; the quick one still lands true.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🦎</div>
+            <div>
+              <strong>Nothing fits &rarr; the declared fallback</strong>
+              <p>The reflex, template, or skip from Module 2 &mdash; always available, already declared.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">route.go</span>
+            <pre><code>
+<span class="code-line">	chosen, ok := best, <span class="code-keyword">false</span></span>
+<span class="code-line">	<span class="code-keyword">for</span> i, t := <span class="code-keyword">range</span> tiers {</span>
+<span class="code-line">		v := <span class="code-function">Route</span>(c, velocity, t.SecondsPerPoint, t.Debt)</span>
+<span class="code-line">		<span class="code-keyword">if</span> !v.Allow {</span>
+<span class="code-line">			<span class="code-keyword">continue</span></span>
+<span class="code-line">		}</span>
+<span class="code-line">		<span class="code-keyword">if</span> !ok || t.Quality &gt; tiers[chosen].Quality {</span>
+<span class="code-line">			chosen, ok = i, <span class="code-keyword">true</span></span>
+<span class="code-line">		}</span>
+<span class="code-line">	}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Start with no winner chosen.</p>
+              <p class="tl">Try every rung of the ladder, one by one&hellip;</p>
+              <p class="tl">&hellip;running the exact same pure gate from Module 1 on each tier &mdash; each with its own pace and its own debt.</p>
+              <p class="tl">If this tier&rsquo;s answer would land stale&hellip;</p>
+              <p class="tl">&hellip;skip it and move on.</p>
+              <p class="tl">(No exceptions &mdash; a tier that can&rsquo;t land in time is out.)</p>
+              <p class="tl">Among the tiers that <em>do</em> fit, prefer the highest quality&hellip;</p>
+              <p class="tl">&hellip;and remember it as the current winner.</p>
+              <p class="tl">Keep the best fit as we go.</p>
+              <p class="tl">Done: smartest oracle that still lands true &mdash; or nothing, and the fallback runs.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! Each tier keeps its own tab</strong>
+            <p>Debt is per-tier: a quick local answer does <strong>not</strong> repay the debt owed to the suppressed cloud tier. In a persistently hot world, the cloud tier&rsquo;s voucher keeps growing until a <em>cloud</em> call finally fits &mdash; so the system escapes not just &ldquo;never consulted,&rdquo; but &ldquo;forever stuck on the cheap answer.&rdquo;</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The empty gate</h2>
+        <p>Here&rsquo;s the design decision that makes everything else trustworthy. The judge that governs the AI contains, deliberately, <em>nothing</em>:</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🕰️</div>
+            <h4 class="pattern-title">No clock</h4>
+            <p class="pattern-desc">It never reads the time &mdash; every duration is handed in as a number.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🎲</div>
+            <h4 class="pattern-title">No randomness</h4>
+            <p class="pattern-desc">Same inputs, same verdict. Every time. Forever.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🚫</div>
+            <h4 class="pattern-title">No model</h4>
+            <p class="pattern-desc">No AI inside the gate &mdash; so the gate can&rsquo;t hallucinate itself open, and no clever <span class="term" data-definition="Prompt injection is an attack where malicious text tricks an AI into ignoring its instructions. A gate made of arithmetic has no prompt to inject into.">prompt injection</span> can talk it open either.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🧾</div>
+            <h4 class="pattern-title">No hidden state</h4>
+            <p class="pattern-desc">Every ruling is reproducible from its own recorded fields &mdash; a <span class="term" data-definition="A property-based test does not check one example — it checks that a rule holds across thousands of generated cases, e.g. every possible verdict must be recomputable from its own record.">property-based test</span> re-derives each verdict from its own record to prove it.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🏛️</div>
+          <div class="callout-content">
+            <strong class="callout-title">The gate that governs the model contains no model</strong>
+            <p>This is the sentence to steal. When AI decides <em>what to answer</em>, something deterministic should decide <em>whether to ask</em>. Tell your AI tools: &ldquo;keep the enforcement path pure &mdash; no model, no clock, no randomness in the code that says yes or no.&rdquo;</p>
+          </div>
+        </div>
+
+        <p>Same reasoning behind one last refusal: budgets have <em>no runtime tuning API</em>. They are doctrine &mdash; constants a human reviews &mdash; because a system that quietly re-tunes its own limits is a model sneaking back into the enforcement path through the side door. The landing log (Module 3&rsquo;s report card) tells humans when a constant is wrong.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Where this pattern travels</h2>
+        <p>Nothing in the formula mentions AI. Any &ldquo;fast world, slow expensive answer&rdquo; problem fits:</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📝</div>
+            <h4 class="pattern-title">AI on live documents</h4>
+            <p class="pattern-desc">Velocity = edits per second. Is the 20-second deep analysis worth it, or will the user type right through it?</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📊</div>
+            <h4 class="pattern-title">Trading</h4>
+            <p class="pattern-desc">Velocity = market volatility; budget = how long an edge stays profitable. Identical formula.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🤖</div>
+            <h4 class="pattern-title">Robotics</h4>
+            <p class="pattern-desc">Heavy route planner vs. reactive controller &mdash; budget measured in how far the plan can diverge.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🧑‍💼</div>
+            <h4 class="pattern-title">Human approvers</h4>
+            <p class="pattern-desc">An approver is an oracle with hours of latency. Approval queues everywhere are full of stale asks nobody priced.</p>
+          </div>
+        </div>
+
+        <p>And that&rsquo;s the whole machine: a pure gate that prices the bet, a lease that re-checks it at landing, an estimator that learns carefully, and debt that keeps anyone from starving &mdash; every decision leaving a receipt you can replay.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Final boarding: put it all together</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right — DebtFactor 0 means the effective budget never inflates: this class is allowed to starve. Perfect for a decision where the fallback is genuinely good enough forever."
+               data-explanation-wrong="Look at the formula: Budget × (1 + debt × 0). What happens to the budget no matter how much debt accrues?">
+            <h3 class="quiz-question">A purely cosmetic feature &mdash; say, an AI-generated flavor text &mdash; is registered with DebtFactor 0. What did the author just declare?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>This class gets priority &mdash; zero debt means zero waiting</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Starving is acceptable here &mdash; the budget never inflates, and that&rsquo;s fine for cosmetics</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The class is disabled and will never run</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly — debt is per-tier. The local landings repay only the local tab; the cloud voucher keeps growing until the cloud tier itself finally fits. Quality starvation gets relief, not just consultation starvation."
+               data-explanation-wrong="Remember: each tier keeps its own tab. Does a quick local answer pay down the debt owed to the suppressed cloud tier?">
+            <h3 class="quiz-question">The world stays hot all afternoon. RouteTiered keeps choosing the fast local oracle, which lands successfully every time. What is happening to the slow cloud tier&rsquo;s debt?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It resets on every landing &mdash; a success is a success</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It stays frozen until the world calms down</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It keeps growing &mdash; until the cloud tier&rsquo;s own inflated budget finally admits a cloud call</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. A model inside Route would make verdicts unreproducible, unauditable, and open to manipulation — the whole value is that the enforcement path is pure arithmetic. Smartness belongs outside: in better velocity measurement or calibration."
+               data-explanation-wrong="Think about what you would lose: could you still replay any logged verdict from its own recorded numbers? Could you still trust the gate under prompt injection?">
+            <h3 class="quiz-question">Your AI assistant proposes: &ldquo;Let&rsquo;s make Route smarter &mdash; I&rsquo;ll call a small ML model inside it to adjust the decision.&rdquo; Why should you refuse?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It breaks the core guarantee &mdash; the gate must stay pure, reproducible arithmetic; intelligence belongs outside it</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ML models are too slow to run in a gate</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No reason &mdash; a smarter gate is strictly better</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right — the landing log already pairs predicted vs. actual drift. If the budget is systematically wrong, the log proves it, and a human changes the reviewed constant. Auto-tuning would be a model creeping back into the enforcement path."
+               data-explanation-wrong="The evidence you need already exists — Module 3 showed a log that pairs the Gate&rsquo;s prediction with reality on every single flight. Who should act on that evidence, and how?">
+            <h3 class="quiz-question">Six months in, you suspect a class&rsquo;s budget of 5 is too strict. What does the landfall way look like?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add an auto-tuner that adjusts budgets from live data</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Read the landing log&rsquo;s predicted-vs-actual pairs, then have a human review and change the constant</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Delete the budget &mdash; the lease check at landing is protection enough</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🛬</div>
+          <div class="callout-content">
+            <strong class="callout-title">You&rsquo;ve made landfall</strong>
+            <p>You can now read every file in this library &mdash; <code>class.go</code>, <code>route.go</code>, <code>lease.go</code>, <code>estimate.go</code> &mdash; and recognize the machine: price the bet, freeze the lease, validate the landing, learn carefully, starve no one. More importantly, you can now <em>ask for</em> these properties in anything you build.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
