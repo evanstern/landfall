@@ -1,0 +1,248 @@
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">The Estimator That Won&rsquo;t Be Fooled</h1>
+      <p class="module-subtitle">The one learning part of landfall &mdash; and the strict rules that keep it honest</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Where does &ldquo;time-to-land&rdquo; come from?</h2>
+        <p>The Gate multiplies velocity by <em>predicted call time</em> &mdash; but who predicts the call time? Think of how you predict your commute: the trip has a <strong>distance</strong> (fixed) and a <strong>pace</strong> (changes with traffic). landfall splits latency the same way:</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">📏</div>
+            <p><strong>Points</strong> &mdash; the distance. How big the ask is. A property of the question, fixed at registration.</p>
+          </div>
+          <div class="flow-arrow">×</div>
+          <div class="flow-step">
+            <div class="flow-step-num">🚦</div>
+            <p><strong>Seconds-per-point</strong> &mdash; the pace. How slow this oracle currently is. Measured live by the Estimator.</p>
+          </div>
+          <div class="flow-arrow">=</div>
+          <div class="flow-step">
+            <div class="flow-step-num">⏱️</div>
+            <p><strong>Time-to-land</strong> &mdash; the prediction the Gate multiplies by velocity.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! Factoring means new decisions start smart</strong>
+            <p>Because size and speed are separate, a brand-new decision class needs <em>zero</em> timing history &mdash; assign it points and it inherits the oracle&rsquo;s measured pace, the way you can estimate a brand-new errand across town because you already know the traffic. One estimator per oracle, not one per decision.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A memory that bends but doesn&rsquo;t break</h2>
+        <p>You know your commute is about 30 minutes. One day a crash makes it 90 &mdash; you don&rsquo;t start planning 90 every day. But when new roadwork adds 5 minutes <em>every</em> day, your gut slowly updates. That exact instinct is six lines of <code>estimate.go</code>:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">estimate.go</span>
+            <pre><code>
+<span class="code-line">	spike := secPerPoint &gt; e.cfg.SpikeFactor*e.estimate</span>
+<span class="code-line">	<span class="code-keyword">if</span> spike {</span>
+<span class="code-line">		e.spikes++</span>
+<span class="code-line">	} <span class="code-keyword">else</span> {</span>
+<span class="code-line">		e.estimate = (<span class="code-number">1</span>-e.cfg.Alpha)*e.estimate + e.cfg.Alpha*secPerPoint</span>
+<span class="code-line">	}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Is this new timing more than 3&times; what we believe? Then it&rsquo;s a spike &mdash; the freak traffic jam.</p>
+              <p class="tl">If it&rsquo;s a spike&hellip;</p>
+              <p class="tl">&hellip;count it (we never forget it happened) but do NOT let it move the estimate.</p>
+              <p class="tl">Otherwise, it&rsquo;s a normal day&hellip;</p>
+              <p class="tl">&hellip;so blend it in gently: keep 80% of the old belief, adopt 20% of the new reading.</p>
+              <p class="tl">Freak events can&rsquo;t poison the estimate; steady change still steers it.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>That 80/20 blend is called an <span class="term" data-definition="An exponentially weighted moving average: a running average where recent readings count more and old ones gently fade — like your sense of the weather leaning on the last few days more than last month.">EWMA</span>. Old evidence never vanishes; it just fades.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The rules of evidence</h2>
+        <p>Two strict doctrines keep this witness honest &mdash; both are one-sentence rules you can demand in any system you build:</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">✅</div>
+            <h4 class="pattern-title">Learn from successes only</h4>
+            <p class="pattern-desc">A failed call&rsquo;s duration says <em>nothing</em> about how long a good answer takes. Failures go to the circuit breaker, never the timing model.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🐢</div>
+            <h4 class="pattern-title">When ignorant, assume slow</h4>
+            <p class="pattern-desc">A fresh estimator is seeded <em>pessimistically</em> &mdash; assumed slower than reality. An uncalibrated system refuses calls and falls back, rather than acting on stale answers.</p>
+          </div>
+        </div>
+
+        <p>And the tuned numbers ship right in the file &mdash; carried over from the project this library was distilled from:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">estimate.go</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">func</span> <span class="code-function">DefaultEstimatorConfig</span>() EstimatorConfig {</span>
+<span class="code-line">	<span class="code-keyword">return</span> EstimatorConfig{Alpha: <span class="code-number">0.2</span>, SpikeFactor: <span class="code-number">3.0</span>, WindowSize: <span class="code-number">20</span>, BreachRate: <span class="code-number">0.3</span>}</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The battle-tested default settings, as one ready-made bundle:</p>
+              <p class="tl">Blend 20% of each new reading; call anything over 3&times; the estimate a spike; watch the last 20 samples; and worry when more than 30% of them are spikes.</p>
+              <p class="tl">Done &mdash; hosts start here and only change these numbers deliberately.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The smoke alarm</h2>
+        <p>One freak jam is noise. But if <strong>6 of your last 20</strong> commutes were &ldquo;freak&rdquo; jams&hellip; they&rsquo;re not freak anymore &mdash; your whole mental map is stale. The Estimator watches its recent window, and when the spike rate crosses 30% it raises a one-time signal: <em>recalibrate me</em>.</p>
+
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Spikes are excluded, but counted</strong>
+              <p>Every sample marks a slot in a rolling 20-slot window: spike or normal.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>The window rate is the tell</strong>
+              <p>Spike rate above 30% over a full window means the baseline itself is lying &mdash; the signal fires once, and re-arms only after things recover.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>A human moves the baseline</strong>
+              <p>The recorded calibration is only ever changed by a person. The live estimator adapts; the official record never drifts silently.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧑‍⚖️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Machines adapt, humans commit</strong>
+            <p>This split &mdash; a live estimate that adapts freely, a recorded baseline only a human may change &mdash; shows up in great production systems everywhere. It&rsquo;s a pattern worth asking your AI tools for by name: &ldquo;let it adapt at runtime, but never let it rewrite its own configured baseline.&rdquo;</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Would the Estimator buy it?</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right — 12 is more than 3× the current estimate of 2, so it is a spike: counted in the window, but the 2.0 estimate does not move."
+               data-explanation-wrong="Check the spike test: is 12 seconds-per-point more than SpikeFactor (3) × the current estimate (2.0)?">
+            <h3 class="quiz-question">The estimate sits at 2.0 seconds-per-point. One call comes back at 12.0. What happens to the estimate?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It jumps toward 12 &mdash; new data is new data</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It stays at 2.0 &mdash; the reading is a spike, counted but excluded</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It splits the difference and lands near 7</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly — 3.0 is under the 3× spike bar, so each reading blends in at 20% and the estimate glides upward. Spike rejection blocks freak events, not real change."
+               data-explanation-wrong="Is 3.0 more than 3× the current 2.0 estimate? It is not — so these readings are not spikes. What does the EWMA do with normal readings?">
+            <h3 class="quiz-question">The oracle genuinely slows down: readings arrive at 3.0, again and again, against an estimate of 2.0. Over many calls, what happens?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The estimate climbs steadily toward 3.0 &mdash; systemic change is followed</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Nothing &mdash; they&rsquo;re all rejected as spikes</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The breach signal fires immediately</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. A timeout says nothing about how long a successful answer takes — feeding it in would poison the pace estimate. Failures belong to the circuit breaker."
+               data-explanation-wrong="Think about what a failed call measures. Does a timeout tell you anything about the pace of a call that succeeds?">
+            <h3 class="quiz-question">An oracle call fails with a 30-second timeout. Your AI assistant suggests feeding that 30s into the Estimator &ldquo;so it learns the oracle is slow.&rdquo; What&rsquo;s the right call?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Feed it &mdash; more data always helps</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Feed it at half weight, to be safe</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Refuse &mdash; failures go to the circuit breaker, never the timing model</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right — seed it pessimistically slow. If the guess is too slow, the system politely falls back until real samples arrive. If you seeded it fast and were wrong, it would confidently launch calls whose answers land stale."
+               data-explanation-wrong="Remember the doctrine: when the system cannot know, which direction should it fail — toward the fallback, or toward acting on stale answers?">
+            <h3 class="quiz-question">You add a brand-new oracle with no timing history. How should its Estimator be seeded?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Optimistically fast &mdash; give the new oracle a chance</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Pessimistically slow &mdash; fail toward the fallback until proven fast</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>At exactly zero &mdash; let the data speak from scratch</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

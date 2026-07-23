@@ -1,0 +1,245 @@
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">The 20-Second Bet</h1>
+      <p class="module-subtitle">What landfall does, and the one-line formula at its heart</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What is this project?</h2>
+        <p><strong>landfall</strong> is not an app you open — it is a <span class="term" data-definition="A library is reusable code that other programs plug in, like a power tool other builders borrow instead of making their own. You cannot run it by itself; an app imports it and calls it.">library</span>, written in <span class="term" data-definition="Go is a programming language made at Google, popular for servers and infrastructure. Its files end in .go. When steering AI tools you might say: write this service in Go.">Go</span>, with exactly one job:</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧭</div>
+          <div class="callout-content">
+            <strong class="callout-title">The one job</strong>
+            <p>Before your app spends money and time on a slow, expensive question — to an <span class="term" data-definition="A large language model: an AI system (like the one you chat with) that answers questions in natural language. Powerful, but slow and paid-per-call.">LLM</span>, a heavy planner, even a human approver — landfall decides: <em>will the answer still be true by the time it arrives?</em> If not, do not ask.</p>
+          </div>
+        </div>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">⚡</div>
+            <div>
+              <strong>A fast loop advances the world</strong>
+              <p>Your app keeps moving: a user keeps typing, a market keeps trading, a robot keeps rolling.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🔮</div>
+            <div>
+              <strong>A slow oracle answers with delay</strong>
+              <p>An <span class="term" data-definition="In this codebase, an oracle is any slow, expensive answer-giver: an AI model, a heavy planning algorithm, a remote service, or a human approver. The word is borrowed from ancient Greece — you travel far, ask your question, and wait.">oracle</span> takes seconds — or hours — to reply. The world does not wait for it.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🚪</div>
+            <div>
+              <strong>landfall is the gate between them</strong>
+              <p>It prices the bet <em>before</em> the call is spent, and re-checks it when the answer lands.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The bet you didn&rsquo;t know you were making</h2>
+        <p>Imagine you&rsquo;re driving and you phone a friend who is <em>very</em> smart but <em>very</em> slow: &ldquo;Which exit do I take?&rdquo; They think for thirty seconds. By the time they answer &mdash; <strong>you&rsquo;ve already passed the exit.</strong></p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>You ask while the car is <strong>here</strong></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>The car <strong>keeps moving</strong> while they think</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>The answer arrives about a road you&rsquo;ve <strong>already left</strong></p>
+          </div>
+        </div>
+
+        <p>Every slow question is secretly this bet: <em>the world when the answer lands will still resemble the world when I asked.</em> Sometimes that bet is safe &mdash; on a long empty highway, a thirty-second answer is fine. In dense city traffic, it is worthless before it arrives.</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! Refuse the bet before you pay, not after</strong>
+            <p>Most software copes with slowness <em>after</em> paying for it &mdash; <span class="term" data-definition="A timeout is a rule that gives up on a slow operation after a fixed wait, e.g. cancel if no reply within 10 seconds. It cuts losses after you already started paying.">timeouts</span> and fallbacks. landfall refuses bets it can predict will lose, so the money and the waiting are never spent at all. Engineers call this being <em>ex-ante</em> (before the fact) instead of <em>ex-post</em> (after it).</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The whole library in one line of arithmetic</h2>
+        <p>landfall prices the bet with grade-school math. No AI inside, no guessing &mdash; just multiplication and one comparison:</p>
+
+        <div class="translation-block" data-validate="off">
+          <div class="translation-code">
+            <span class="translation-label">THE FORMULA</span>
+            <pre><code>
+<span class="code-line"><span class="code-property">predicted drift</span> <span class="code-operator">=</span> velocity <span class="code-operator">×</span> time-to-land</span>
+<span class="code-line"><span class="code-keyword">allow</span> <span class="code-keyword">iff</span> predicted drift <span class="code-operator">≤</span> budget</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">How much will the world change while we wait? Speed of change, times how long the answer takes.</p>
+              <p class="tl">Ask only if that predicted change fits inside what this decision can survive.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🌊</div>
+            <h4 class="pattern-title">Velocity</h4>
+            <p class="pattern-desc">How fast the world is changing right now, measured in <span class="term" data-definition="A salient event is a change big enough to matter to the decision — a meaningful edit, a price jump, an obstacle appearing. Trivial noise does not count.">salient events</span> per second. Highway cruising is low velocity; city traffic is high.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">⏱️</div>
+            <h4 class="pattern-title">Time-to-land</h4>
+            <p class="pattern-desc">Predicted seconds until the answer arrives. Named for the moment an answer &ldquo;lands&rdquo; back in your app &mdash; hence <em>landfall</em>.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📐</div>
+            <h4 class="pattern-title">Predicted drift</h4>
+            <p class="pattern-desc">The product of the two: how many salient events will pile up while the answer is in flight.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🛡️</div>
+            <h4 class="pattern-title">Budget</h4>
+            <p class="pattern-desc">How much change this kind of decision survives. Budget 5 reads: &ldquo;this answer stays useful through 5 salient events.&rdquo; It&rsquo;s the answer&rsquo;s half-life.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The real code &mdash; exactly as it ships</h2>
+        <p>Here is the heart of the gate, from <code>route.go</code>. This is the actual shipping code, not a cleaned-up version:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">route.go</span>
+            <pre><code>
+<span class="code-line">	v.PredictedWallSec = <span class="code-function">float64</span>(c.Points) * secondsPerPoint</span>
+<span class="code-line">	v.EffectiveBudget = c.Budget * (<span class="code-number">1</span> + debt*c.DebtFactor)</span>
+<span class="code-line">	<span class="code-keyword">if</span> velocity &lt; <span class="code-number">0</span> || math.<span class="code-function">IsNaN</span>(velocity) || math.<span class="code-function">IsInf</span>(velocity, <span class="code-number">0</span>) {</span>
+<span class="code-line">		v.Arithmetic = fmt.<span class="code-function">Sprintf</span>(<span class="code-string">"%dpt x %.1fs/pt at unmeasurable velocity (%v) - suppressed"</span>, c.Points, secondsPerPoint, velocity)</span>
+<span class="code-line">		<span class="code-keyword">return</span> v</span>
+<span class="code-line">	}</span>
+<span class="code-line">	v.PredictedDrift = v.PredictedWallSec * velocity</span>
+<span class="code-line">	v.Allow = v.PredictedDrift &lt;= v.EffectiveBudget</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Predict how long the call will take: the size of the ask times measured seconds per unit of size.</p>
+              <p class="tl">Compute the budget, with a fairness boost for decisions that keep getting told no &mdash; we&rsquo;ll meet this &ldquo;debt&rdquo; in Module 5.</p>
+              <p class="tl">If the speed of the world is unmeasurable &mdash; negative, or a broken number &mdash; do not guess&hellip;</p>
+              <p class="tl">&hellip;write down exactly why we refused, in human-readable math&hellip;</p>
+              <p class="tl">&hellip;and answer &ldquo;no&rdquo; right here. When in doubt, refuse.</p>
+              <p class="tl">Close the safety check.</p>
+              <p class="tl">The formula itself: predicted change = predicted wait &times; world speed.</p>
+              <p class="tl">Allow the call only if predicted change fits in the budget. That single comparison is the whole gate.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">⏸️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Zero means paused, and paused is always safe</strong>
+            <p>If velocity is <strong>0</strong>, the world is standing still &mdash; anything &times; 0 = 0 drift, so the call is always allowed. But an <em>unmeasurable</em> velocity is refused outright. The doctrine: when the system doesn&rsquo;t know, it fails toward caution, never toward acting on stale information.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Your turn: price some bets</h2>
+        <p>Use the formula. Nothing here needs code &mdash; just the multiplication you already know.</p>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. 2 events/sec × 5 sec = 10 predicted drift, which is bigger than the budget of 6 — the gate refuses before any money is spent."
+               data-explanation-wrong="Work the formula: velocity (2) × time-to-land (5) = 10 predicted drift. Compare that to the budget of 6.">
+            <h3 class="quiz-question">A document assistant wants a 5-second AI call. The user is editing at 2 salient events per second, and this decision&rsquo;s budget is 6. What does the gate do?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Allow it &mdash; 5 seconds is a short call</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Refuse it &mdash; predicted drift is 10, over the budget of 6</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Allow it, but cancel if it takes too long</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Right! Velocity 0 means the world is paused — zero drift no matter how slow the call is. A paused world is the safest possible time to ask a slow question."
+               data-explanation-wrong="Think about the multiplication: anything × 0 = 0 predicted drift. Can 0 ever exceed a budget?">
+            <h3 class="quiz-question">The user goes to lunch and stops editing entirely &mdash; velocity drops to 0. The assistant wants a huge 60-second analysis. What happens?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Refused &mdash; 60 seconds is far too slow</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Refused &mdash; the gate can&rsquo;t measure a stopped world</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Allowed &mdash; a paused world means zero predicted drift</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly — the sensor is broken, not reporting zero. The gate treats unmeasurable velocity as danger and refuses, because guessing could mean acting on stale information."
+               data-explanation-wrong="Careful — a broken measurement is not the same as a measurement of zero. What did the doctrine say the gate does when it cannot know?">
+            <h3 class="quiz-question">A bug makes the velocity measurement come back as NaN (&ldquo;not a number&rdquo; &mdash; a broken value). What does the gate do, and why?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Refuse &mdash; when it can&rsquo;t measure, it fails toward caution</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Treat it as 0 and allow &mdash; no data means no drift</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Crash the app so someone notices the bug</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

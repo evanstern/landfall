@@ -1,0 +1,285 @@
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">The Flight</h1>
+      <p class="module-subtitle">Takeoff clearance is not landing clearance &mdash; how an allowed call is checked again when it returns</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Cleared for takeoff &ne; cleared to land</h2>
+        <p>An airplane gets <em>two</em> separate clearances: one to take off, and a fresh one to land &mdash; because the weather at the destination may have changed during the flight. landfall works exactly the same way. The Gate&rsquo;s &ldquo;allow&rdquo; was a <em>prediction</em>; while the oracle thinks, the world keeps moving.</p>
+
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Checkout &mdash; takeoff</strong>
+              <p>The moment an allowed call launches, a <strong>Lease</strong> freezes a snapshot: which class flew, the budget it was allowed against, the drift the Gate bet on, and the world&rsquo;s <span class="term" data-definition="The generation is a simple counter your app increments every time something big (a salient event) happens. Comparing two generation numbers instantly answers: did anything important change in between?">generation</span> number.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Flight &mdash; the world moves on</strong>
+              <p>The oracle thinks. Meanwhile drift accumulates, and if something truly major happens, the host bumps the generation counter.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Land &mdash; the second clearance</strong>
+              <p>When the answer arrives, <code>Land</code> compares the frozen snapshot against reality and rules: apply it, or don&rsquo;t &mdash; with the numbers to prove it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The flight recorder: Checkout</h2>
+        <p>The entire takeoff procedure is three lines in <code>lease.go</code>:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">lease.go</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">func</span> <span class="code-function">Checkout</span>(v Verdict, gen <span class="code-keyword">uint64</span>) Lease {</span>
+<span class="code-line">	<span class="code-keyword">return</span> Lease{Gen: gen, Class: v.Class, Budget: v.EffectiveBudget, PredictedDrift: v.PredictedDrift}</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">At launch, take the allowed Verdict and the current generation number&hellip;</p>
+              <p class="tl">&hellip;and freeze four facts into the Lease: the generation at takeoff, who flew, the budget it was judged against, and the drift the Gate predicted.</p>
+              <p class="tl">That&rsquo;s it &mdash; a tiny, tamper-proof boarding pass.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧊</div>
+          <div class="callout-content">
+            <strong class="callout-title">Why freeze the prediction inside the lease?</strong>
+            <p>Because carrying the bet <em>with</em> the flight means every landing can compare &ldquo;what the Gate predicted&rdquo; against &ldquo;what actually happened&rdquo; in one record &mdash; no digging through old logs to match them up. Databases call this style <span class="term" data-definition="Optimistic concurrency control: do the work first assuming nothing will conflict, then validate at the end against what changed meanwhile — and discard the work if the assumption failed. Cheaper than locking everything up front.">optimistic concurrency control</span>: proceed hopefully, validate at the end.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Follow one call, gate to landing</h2>
+        <p>Step through a full flight &mdash; including the mid-flight surprise:</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"The app wants a slow planner answer and brings the evidence to the Gate"},
+          {"highlight":"flow-actor-2","label":"The app asks the Gate for clearance","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"Gate: predicted drift 4 fits budget 5 - ALLOWED. Lease frozen at generation 41"},
+          {"highlight":"flow-actor-3","label":"The question flies to the slow Oracle","packet":true,"from":"actor-1","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"Meanwhile the World keeps moving - drift accumulates"},
+          {"highlight":"flow-actor-4","label":"A salient event! The host bumps the generation: 41 becomes 42"},
+          {"highlight":"flow-actor-1","label":"The answer lands back at the app","packet":true,"from":"actor-3","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"Land check: generation 42 differs from 41 - SUPERSEDED. Do not apply the answer"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-actor-5)">🏛️</div>
+              <span>Your App</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">⚖️</div>
+              <span>Gate</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">🔮</div>
+              <span>Oracle</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">🌍</div>
+              <span>World</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">Click &ldquo;Next Step&rdquo; to begin</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three ways to land</h2>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">✅</div>
+            <h4 class="pattern-title">Landed</h4>
+            <p class="pattern-desc">Same generation, drift within budget. The world still matches &mdash; apply the answer.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔄</div>
+            <h4 class="pattern-title">Superseded</h4>
+            <p class="pattern-desc">A salient event bumped the generation mid-flight. Don&rsquo;t apply it &mdash; but you may quietly <span class="term" data-definition="Warming a cache means storing a computed result so a future request can reuse it instantly. The superseded answer was not useless — it becomes a head start for next time.">warm a cache</span> with it.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">⏰</div>
+            <h4 class="pattern-title">Stale</h4>
+            <p class="pattern-desc">No supersession, but actual drift blew past the budget &mdash; <em>the Gate&rsquo;s prediction was wrong.</em> Record it loudly.</p>
+          </div>
+        </div>
+
+        <p>And the landing check itself, verbatim from <code>lease.go</code>:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">lease.go</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">func</span> (l Lease) <span class="code-function">Land</span>(currentGen <span class="code-keyword">uint64</span>, actualDrift <span class="code-keyword">float64</span>) Landing {</span>
+<span class="code-line">	ld := Landing{</span>
+<span class="code-line">		Class: l.Class, Gen: l.Gen, CurrentGen: currentGen,</span>
+<span class="code-line">		Budget: l.Budget, PredictedDrift: l.PredictedDrift, ActualDrift: actualDrift,</span>
+<span class="code-line">	}</span>
+<span class="code-line">	<span class="code-keyword">switch</span> {</span>
+<span class="code-line">	<span class="code-keyword">case</span> currentGen != l.Gen:</span>
+<span class="code-line">		ld.Outcome = Superseded</span>
+<span class="code-line">	<span class="code-keyword">case</span> actualDrift &gt; l.Budget:</span>
+<span class="code-line">		ld.Outcome = Stale</span>
+<span class="code-line">	<span class="code-keyword">default</span>:</span>
+<span class="code-line">		ld.Outcome = Landed</span>
+<span class="code-line">	}</span>
+<span class="code-line">	<span class="code-keyword">return</span> ld</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The landing clearance: hand in the world as it is now &mdash; current generation and the drift that actually accumulated.</p>
+              <p class="tl">Start writing the Landing record&hellip;</p>
+              <p class="tl">&hellip;copying in everything frozen at takeoff&hellip;</p>
+              <p class="tl">&hellip;plus the prediction and what really happened &mdash; side by side in one record.</p>
+              <p class="tl">Snapshot complete.</p>
+              <p class="tl">Now the ruling &mdash; checked in strict priority order:</p>
+              <p class="tl">Did the generation change during the flight?</p>
+              <p class="tl">Then something big happened: Superseded &mdash; no matter how small the drift was.</p>
+              <p class="tl">Otherwise, did real drift exceed the budget?</p>
+              <p class="tl">Then the Gate&rsquo;s bet lost: Stale.</p>
+              <p class="tl">Neither?</p>
+              <p class="tl">Safe to apply: Landed.</p>
+              <p class="tl">End of the ruling.</p>
+              <p class="tl">Return the record &mdash; every landing gets one, even the failures. Especially the failures.</p>
+              <p class="tl">Done: pure arithmetic, same inputs, same outcome, every time.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! Supersession trumps staleness</strong>
+            <p>Notice the <code>switch</code> order: the generation check comes first. If the big event happened, the answer is dead <em>regardless</em> of how little drift accrued &mdash; and every dropped answer leaves a record. A silently dropped answer is how &ldquo;why is the assistant so passive?&rdquo; mystery bugs are born.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The report card that writes itself</h2>
+        <p>Because every Landing carries <strong>PredictedDrift</strong> and <strong>ActualDrift</strong> in the same units, the landing log doubles as the Gate&rsquo;s report card &mdash; for free.</p>
+
+        <div class="badge-list stagger-children">
+          <div class="badge-item animate-in">
+            <code class="badge-code">predicted 4.5 / actual 4.1</code>
+            <span class="badge-desc">Healthy: the Gate&rsquo;s bets are landing close to reality</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">predicted 4.5 / actual 9.8</code>
+            <span class="badge-desc">One bad bet &mdash; noise happens, keep watching</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">predicted &lt; actual, every day</code>
+            <span class="badge-desc">A pattern of Stale outcomes: the velocity measurement or the timing calibration is lying &mdash; a human should fix the inputs</span>
+          </div>
+        </div>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Right — same generation and 3 ≤ 8, so it Landed. Both checks passed; the answer is applied."
+               data-explanation-wrong="Walk the switch: is the generation different? No. Is actual drift (3) above the budget (8)? No. So...">
+            <h3 class="quiz-question">A call checks out at generation 12 with budget 8. It lands at generation 12 with actual drift 3. What&rsquo;s the outcome?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Landed &mdash; apply the answer</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Stale &mdash; too much drift</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Superseded &mdash; the world moved on</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly — supersession trumps staleness. The generation check runs first, so even a tiny drift cannot save an answer the world has overtaken. The answer may still warm a cache."
+               data-explanation-wrong="Remember the order of the switch in Land: which check runs before the drift comparison?">
+            <h3 class="quiz-question">Checkout at generation 7; while the oracle thinks, one salient event bumps it to 8. The answer lands with a tiny actual drift of 0.5, well under budget. Outcome?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Landed &mdash; the drift was tiny</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Stale &mdash; the prediction was off</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Superseded &mdash; the generation changed, drift doesn&rsquo;t matter</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. Stale means the Gate predicted wrong, and a pattern of wrong predictions indicts the inputs — the velocity measurement or the seconds-per-point calibration — not the answers themselves."
+               data-explanation-wrong="Stale means no supersession happened — the world did not jump. The Gate simply bet wrong, repeatedly. What feeds the Gate its numbers?">
+            <h3 class="quiz-question">Your landing log shows dozens of Stale outcomes this week for one class. What&rsquo;s the smart diagnosis?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The oracle is giving bad answers &mdash; switch providers</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The Gate&rsquo;s inputs are lying &mdash; check the velocity measurement or timing calibration</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The world had too many salient events &mdash; nothing to fix</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

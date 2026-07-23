@@ -1,9 +1,10 @@
 ---
 id: TASK-6
 title: 'Interactive course: docs/course from codebase-to-course'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-07-23 05:54'
+updated_date: '2026-07-23 05:55'
 labels: []
 dependencies: []
 priority: medium
@@ -18,8 +19,23 @@ Generate the interactive single-page HTML course (praxisflux codebase-to-course)
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Course directory docs/course/ exists with prebuilt chrome (styles.css, main.js v2 stamp) copied from plugin references
-- [ ] #2 Five modules covering gate formula, actors, lease lifecycle, estimator, debt/tiers/purity — all code snippets verbatim from source
-- [ ] #3 build.sh validation passes and index.html is assembled
-- [ ] #4 codebase-to-course output gate passes (self-contained, mandatory interactive elements present)
+- [x] #1 Course directory docs/course/ exists with prebuilt chrome (styles.css, main.js v2 stamp) copied from plugin references
+- [x] #2 Five modules covering gate formula, actors, lease lifecycle, estimator, debt/tiers/purity — all code snippets verbatim from source
+- [x] #3 build.sh validation passes and index.html is assembled
+- [x] #4 codebase-to-course output gate passes (self-contained, mandatory interactive elements present)
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Copy prebuilt chrome (styles.css, main.js, _footer.html, build.sh, validate.mjs) verbatim from plugin references; customize _base.html (title, teal accent, 5 nav dots).
+2. Analyze codebase from raw source + DESIGN.md (no docs/wiki yet) and design a 5-module sequential curriculum.
+3. Write modules: 01 gate formula (Route), 02 cast (Class/Verdict/Estimator/host, group chat), 03 lease lifecycle (flow animation), 04 estimator (EWMA/spike/pessimism), 05 debt/RouteTiered/purity. All snippets verbatim.
+4. bash build.sh (validates translation blocks, assembles index.html); run codebase-to-course output gate; fix until green.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Course built and validated in-session: build.sh OK across 5 modules; output gate passed (5 modules, self-contained, all mandatory elements). Opened in browser for review.
+<!-- SECTION:NOTES:END -->
