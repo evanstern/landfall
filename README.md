@@ -22,12 +22,14 @@ if !v.Allow {
     runDegrade(v)      // the declared floor: skip | reflex | template | faster-tier
     return
 }
-lease := landfall.Lease{Gen: world.Gen(), Class: c.Name, Budget: v.EffectiveBudget}
+lease := landfall.Checkout(v, world.Gen())      // freezes budget + predicted drift
 answer := oracle.Ask(...)                       // slow; world keeps moving
-switch lease.Land(world.Gen(), world.DriftSince(lease.Gen)) {
+ld := lease.Land(world.Gen(), world.DriftSince(lease.Gen))
+record(ld)                                      // pairs predicted vs actual drift — no join
+switch ld.Outcome {
 case landfall.Landed:     apply(answer)
 case landfall.Superseded: warmCache(answer)     // salient event won mid-flight
-case landfall.Stale:      recordLoudly(...)     // the gate's prediction was wrong
+case landfall.Stale:      // the gate's prediction was wrong; ld says by how much
 }
 ```
 

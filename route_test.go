@@ -60,7 +60,9 @@ func TestRouteDebtRelievesStarvation(t *testing.T) {
 }
 
 // TestVerdictReproducible is the pattern's defining property: any logged
-// verdict must be reproducible from its own recorded fields.
+// verdict must be reproducible from its own recorded fields — and the record
+// chain survives checkout: the lease freezes the verdict's arithmetic, so the
+// landing log inherits the same reproducibility (TestLandingReproducible).
 func TestVerdictReproducible(t *testing.T) {
 	for _, vel := range []float64{0, 0.5, 1, 5, 100} {
 		for _, debt := range []float64{0, 1, 3} {
@@ -69,6 +71,10 @@ func TestVerdictReproducible(t *testing.T) {
 			r := Route(c, v.Velocity, v.SecondsPerPoint, v.Debt)
 			if r != v {
 				t.Errorf("verdict not reproducible from its own record:\n got %+v\nwant %+v", r, v)
+			}
+			l := Checkout(v, 1)
+			if l.Class != v.Class || l.Budget != v.EffectiveBudget || l.PredictedDrift != v.PredictedDrift {
+				t.Errorf("checkout must freeze the verdict's arithmetic into the lease:\n lease %+v\n verdict %+v", l, v)
 			}
 		}
 	}
