@@ -1,10 +1,10 @@
 ---
 id: TASK-7
 title: 'Grounding wiki: build docs/wiki corpus'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-07-23 05:54'
-updated_date: '2026-07-23 06:02'
+updated_date: '2026-07-23 06:03'
 labels: []
 dependencies: []
 priority: medium
@@ -38,3 +38,9 @@ Build the code-grounded corpus (grounding-wiki plugin) at docs/wiki/: per-concep
 <!-- SECTION:NOTES:BEGIN -->
 Corpus built at docs/wiki/: INDEX.md + 19 notes pinned to a9b5701, grouped by gate/classes/starvation/landing/estimation/doctrine. Freshness gate: OK, 19 notes fresh against pinned sources.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Grounding wiki shipped at docs/wiki/ (PR #6, merged). INDEX.md + 19 per-concept notes pinned to a9b5701, each listing the sources whose change invalidates it: gate (route-gate, verdict, velocity-semantics, drift-unit, route-tiered), classes (decision-class, degrade-modes, points-latency-model), starvation (suppression-debt, per-tier-debt), landing (lease-lifecycle, landing-outcomes), estimation (estimator, calibration-doctrine), and doctrine/context (invariants-and-purity, host-obligations, test-suite, lineage-and-prior-art, overview). Freshness gate green: 19 notes fresh, all links resolving. The corpus is now the primary input for future course updates; keep it honest with wiki-update after merging changes that touch pinned sources.
+<!-- SECTION:FINAL_SUMMARY:END -->
