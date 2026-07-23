@@ -19,6 +19,10 @@ predicted drift = world velocity × predicted time-to-land
 allow iff predicted drift ≤ tolerance(decision class)
 ```
 
+This threshold shape is not folk engineering: in remote estimation it is the
+provably optimal sampling policy (Sun, Polyanskiy & Uysal; Ornee & Sun — see
+[Prior art & theory](#prior-art--theory)).
+
 Three properties distinguish it from a rate limiter:
 
 1. **Ex-ante, not ex-post.** Timeouts and fallbacks cope after you've paid.
@@ -154,6 +158,71 @@ and outcomes, calibration files, and the circuit breaker.
 - **Transport concerns** — retries, breakers, pooling. Pair with a
   busy-≠-down breaker; landfall only insists failures don't feed the
   estimator.
+
+## Prior art & theory
+
+landfall is the engineering packaging of proven results, not a new theory.
+Every element has a lineage, and the design claims that lineage explicitly
+rather than presenting the arithmetic as folk wisdom. (Grounding with full
+citations: `research/Staleness-Budgeted-Admission-Control/`.)
+
+- **The problem statement is AI metareasoning.** Boddy & Dean (1988–1994)
+  framed time-dependent planning: the world changes while the agent
+  deliberates, so deliberation itself must be scheduled against that drift.
+  Russell & Wefald (1991) formalized the value of computation — run a
+  computation only if its expected utility gain exceeds its time cost. The
+  gate is the budget-form linearization of exactly that test.
+- **The gate formula has optimality proofs behind it.** Sun, Polyanskiy &
+  Uysal ([arXiv:1701.06734](https://arxiv.org/abs/1701.06734)) prove that
+  when sampling a Wiener process observed through a random-delay channel,
+  the policy minimizing mean-square estimation error is a threshold on how
+  much the process drifts during the service time — structurally the same
+  object as `velocity × time-to-land ≤ budget`. Ornee & Sun extend the
+  threshold to mean-reverting (Ornstein–Uhlenbeck) processes, and later
+  work learns it online under unknown delay statistics
+  ([arXiv:2308.15401](https://arxiv.org/abs/2308.15401)). Self-triggered
+  control (Heemels, Johansson & Tabuada, IEEE CDC 2012) is the same
+  ex-ante stance in control theory: compute the next sampling instant
+  ahead of time from a model, rather than reacting after deviation.
+- **The drift unit is the Age-of-Incorrect-Information stance.** Plain Age
+  of Information ages from delivery regardless of content; AoII
+  ([arXiv:1907.06604](https://arxiv.org/abs/1907.06604)) accrues age only
+  while the monitor's picture is actually *wrong*. "Expected salient events
+  during flight" is that content-aware refinement: the budget prices
+  decision-relevant change, not elapsed time, which is what lets the same
+  unit serve as both admission tolerance and landing measurement.
+- **Suppression debt is a Lyapunov virtual queue.** In Neely's
+  drift-plus-penalty framework
+  ([arXiv:1008.3519](https://arxiv.org/abs/1008.3519)), each time-average
+  constraint gets a virtual queue that grows while the constraint is
+  violated and inflates its priority until it is served, with proven
+  stability bounds. Debt is that counter with
+  `Budget × (1 + debt × DebtFactor)` as the inflation term — accumulate
+  while suppressed, spend by landing. OS scheduler aging is the same
+  bounded-starvation invariant with simpler arithmetic.
+- **The lease is optimistic concurrency control.** Kung & Robinson (1981):
+  work in private, validate against what committed meanwhile, apply only if
+  validation passes. Ask-gate → flight → land-validate is that three-phase
+  shape — the oracle call is the read phase, landing is validation,
+  `Superseded`/`Stale` are the aborts. TL2's global version clock (Dice,
+  Shalev & Shavit 2006) is the concrete generation-counter discipline the
+  `Lease` uses, and the term itself is Gray & Cheriton (1989): a
+  time-bounded grant whose expiry bounds how stale a holder's view can be.
+
+**The honest gap: doctrine constants vs. derived optimal thresholds.** The
+optimality results above *derive* their thresholds from process statistics;
+landfall's budgets are doctrine — reviewed constants, deliberately not
+optimized (see "Learned budgets" under out-of-scope). Measured against
+Sun/Ornee, doctrine constants carry regret: a derived threshold would track
+the process better. They are kept anyway because they buy what the derived
+threshold can't: budgets that are auditable, diffable in review, and
+meaningful to a human ("this decision survives 5 salient events"). The
+calibration log (invariant 5) is the monitor on that tradeoff — when
+predicted-vs-actual drift shows systematic error, the constant is wrong and
+a human changes it. What landfall claims as its own is not the theory but
+the packaging: the pure gate with no model in the enforcement path, the
+verdict that carries its own arithmetic, and degradation forced to exist at
+registration.
 
 ## Open questions
 
