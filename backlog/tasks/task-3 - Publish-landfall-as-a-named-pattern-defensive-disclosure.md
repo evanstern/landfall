@@ -4,7 +4,7 @@ title: Publish landfall as a named pattern (defensive disclosure)
 status: In Progress
 assignee: []
 created_date: '2026-07-23 04:28'
-updated_date: '2026-07-23 04:54'
+updated_date: '2026-07-23 04:57'
 labels: []
 dependencies:
   - TASK-1
@@ -37,3 +37,9 @@ Derived from Analysis-Using-The-Prior-Art. The corpus shows every element indivi
 3. Link PATTERN.md from README.
 4. go test -race ./... (doctrine), one branch task-3-defensive-disclosure, one PR.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Write-up complete and pushed on branch task-3-defensive-disclosure: PATTERN.md (names the pattern Landfall; five elements E1–E5; ask-gate → flight → land-validate lifecycle; per-element prior-art lineage; deterministic-auditable differentiator; explicit claimed/not-claimed section; plain + BibTeX citation block). PRIOR-ART.md gains a dated 'Decision: publish, don't patent (2026-07-23)' section; README links both. Urgency argument leans on RRARA + Win Fast or Lose Slow (NeurIPS 2025) + plan caching + older literature per task guidance; ASSCG cited only with an unverified-review caveat; Faramesh not leaned on. go test -race passes. PR #2 open: https://github.com/evanstern/landfall/pull/2 — merge blocked by session permissions, awaiting human merge. ACs to be ticked once the write-up is on main, since the citable URL points at main.
+<!-- SECTION:NOTES:END -->
