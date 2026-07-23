@@ -111,6 +111,24 @@ reproducibility survive. Composable escapes: speculative warm calls (run,
 don't act, warm a cache — the natural fate of a `Superseded` answer) and the
 zero-velocity pause sandbox (pause is zero staleness by doctrine).
 
+**Debt under `RouteTiered` — per-constraint queues (doctrine).** Debt queues
+follow Neely's virtual-queue discipline: one queue per constraint, and under
+`RouteTiered` each tier is its own constraint — "consulted at quality ≥ this
+tier's, often enough." Each `Tier` carries its own `Debt`; the gate tests each
+tier against its *own* debt-inflated budget, and one tier's queue never
+inflates another tier's budget. Consequently **a landed local call does not
+repay the debt owed to the suppressed cloud tier**: in a persistently hot
+world the class keeps being served locally while the cloud queue keeps
+growing, until the cloud tier's own inflated budget admits a cloud call —
+relief from quality starvation, not just consultation starvation. A landing
+at tier T repays the queues of T and every lower-quality tier (they were
+served at ≥ their quality); queues of higher-quality tiers survive. The
+lowest tier's queue still grows under total suppression, so the plain
+eventual-consultation guarantee is preserved. Accrual and reset are the
+host's (see obligations below); the gate stays pure — per-tier debt is
+passed in on the `Tier` and the chosen tier's debt is recorded in the
+verdict.
+
 ## Where it applies
 
 - **LLM agents on live state** — assistant on an actively-edited buffer:
@@ -146,6 +164,13 @@ it *outside* the gate, pass a number in — the estimator is separately
 testable and the verdict records what it was fed), bumping the world
 generation on salient events, accruing/resetting debt, persisting verdicts
 and outcomes, calibration files, and the circuit breaker.
+
+Debt accrual under `RouteTiered` follows the per-constraint doctrine: on
+every verdict, the host increments the queue of each tier whose quality
+exceeds the landed tier's (all tiers, when nothing lands); when a call lands
+at tier T, the host resets the queues of T and every lower-quality tier.
+Plain `Route` keeps a single queue per class: accrue on suppression, reset on
+landing.
 
 ## Out of scope, deliberately
 
@@ -199,7 +224,9 @@ citations: `research/Staleness-Budgeted-Admission-Control/`.)
   stability bounds. Debt is that counter with
   `Budget × (1 + debt × DebtFactor)` as the inflation term — accumulate
   while suppressed, spend by landing. OS scheduler aging is the same
-  bounded-starvation invariant with simpler arithmetic.
+  bounded-starvation invariant with simpler arithmetic. The per-tier debt
+  doctrine under `RouteTiered` (see Starvation) is this discipline applied
+  literally: one queue per constraint, each tier a constraint.
 - **The lease is optimistic concurrency control.** Kung & Robinson (1981):
   work in private, validate against what committed meanwhile, apply only if
   validation passes. Ask-gate → flight → land-validate is that three-phase
@@ -226,9 +253,6 @@ registration.
 
 ## Open questions
 
-- Debt semantics under `RouteTiered`: does a landed *local* call repay debt
-  owed to the suppressed *cloud* class? Currently the host decides; may
-  deserve doctrine.
 - Should `Lease` carry predicted drift too, so `Stale` outcomes can log
   predicted-vs-actual without a join?
 - Velocity estimators worth shipping as optional helpers: salient-event EWMA,

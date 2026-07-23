@@ -85,6 +85,15 @@ velocity the oracle is still eventually consulted. Debt is passed *into* the
 gate and recorded in the verdict — never accrued inside it — so purity
 survives.
 
+Under the comparative (tiered) form of the gate, debt queues are
+per-constraint in the Lyapunov virtual-queue sense: each tier is its own
+constraint ("consulted at quality ≥ this tier's, often enough") with its own
+queue, tested against its own debt-inflated budget. A landing repays only
+its own tier's queue and those of lower quality — a landed fast-tier call
+does **not** repay the debt owed to the suppressed best tier, whose queue
+keeps growing until that tier itself is admitted. This bounds *quality*
+starvation, not just consultation starvation.
+
 **E5 — The generation lease and landing validation.** An allowed call checks
 out a lease: the world's generation counter at launch plus the effective
 budget it was admitted against. Salient events bump the generation. When the
