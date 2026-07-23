@@ -47,12 +47,14 @@ critical path" ([[_grounding]] §converging).
 
 ## Audit / authorization plane
 
-**Faramesh** ([arXiv:2601.17744](https://arxiv.org/abs/2601.17744), abstract verified
+**Faramesh** ([arXiv:2601.17744](https://arxiv.org/abs/2601.17744), full text verified
 2026-07-23) — a pre-execution Action Authorization Boundary issuing PERMIT/DEFER/DENY, with
-append-only provenance logs keyed by canonical action hashes for deterministic replay. Note:
-the seed survey describes it as "oracle latency budgets + audited fallback policy," but the
-verified abstract supports auditable pre-execution authorization only — the latency-budget
-claim is unconfirmed at abstract level ([[_grounding]] §converging).
+append-only provenance logs keyed by canonical action hashes for deterministic replay.
+Full-text verification resolved the seed survey's discrepancy: the paper contains no latency
+budgets and no fallback policy — latency appears only as a measured metric, DEFER pauses for
+approval rather than triggering an alternative path, and decision-to-execution staleness is
+named as a limitation, not addressed. Faramesh is adjacent on the audit/authorization plane
+only ([[_grounding]] §converging).
 
 ## Naming
 

@@ -165,13 +165,18 @@ E4 suppression debt, E5 generation lease + landing validation?
   ([arXiv:2509.01920](https://arxiv.org/pdf/2509.01920)): speculative execution for agent
   planning (named by the seed survey as converging work).
 - **Faramesh** — "A Protocol-Agnostic Execution Control Plane for Autonomous Agent Systems"
-  ([arXiv:2601.17744](https://arxiv.org/abs/2601.17744), abstract verified 2026-07-23): mandatory
-  Action Authorization Boundary; canonicalizes agent actions, evaluates policy, issues binding
+  ([arXiv:2601.17744](https://arxiv.org/abs/2601.17744), full text v1 HTML verified 2026-07-23):
+  mandatory Action Authorization Boundary; canonicalizes agent actions into a Canonical Action
+  Representation, evaluates them deterministically against policy and state, issues binding
   PERMIT/DEFER/DENY before execution; **append-only provenance logging keyed by canonical action
-  hashes** for auditability and deterministic replay. **Note: the abstract does not mention
-  "oracle latency budgets" or "audited fallback policy"** — the seed survey (PRIOR-ART.md line
-  51–52) characterizes it that way; the verified abstract supports "auditable pre-execution
-  authorization" but not latency budgeting. Discrepancy recorded, not resolved.
+  hashes** for auditability and deterministic replay; fail-closed semantics (any authorization
+  failure resolves to deny/defer). Full-text findings: no latency budgets, deadlines, or
+  latency-aware admission anywhere — latency appears only as a measured metric (p50/p95
+  end-to-end decision latency, 2.24/9.61 ms); DEFER means pause-for-approval, not an alternative
+  execution path — no fallback or degradation policy; staleness/drift between decision time and
+  execution time is acknowledged as a limitation, not addressed. **Discrepancy resolved: the
+  seed survey's "oracle latency budgets + audited fallback policy" characterization is not
+  supported by the full text** (verified 2026-07-23, TASK-2).
 - Adjacent caching/scheduling systems named in searches: Agentic Plan Caching
   ([arXiv:2506.14852](https://arxiv.org/abs/2506.14852)), AgenticCache
   ([arXiv:2604.24039](https://arxiv.org/abs/2604.24039)) — background Cache Updater
@@ -188,11 +193,44 @@ E4 suppression debt, E5 generation lease + landing validation?
   surfaced independently in this fan-out): assigns a time-based budget/ceiling of the latency
   requirement for reaching another data center; routing chooses among data centers with a
   qualified compute server within the time budget.
-- Named in the seed survey (not independently re-verified in this pass): US 11,257,002 /
-  11,461,300 (accuracy/latency-based ML model selection); US 2022/0004929 A1 (on-device ML,
-  stale-context expiration before inference); US 11,717,748 B2 (latency compensation via
-  prediction, games); US 9,679,003 / 8,396,831 (OCC validation); US 8,972,306
-  (value-of-information sensor tasking); EP 1,813,065 B1 (event-triggered communication).
+- Seed-survey list re-verified against actual claims 2026-07-23 via Google Patents (TASK-2):
+  - **US 11,257,002** (Amazon, granted 2022-02-22) — "Dynamic accuracy-based deployment and
+    monitoring of machine learning models in provider networks": accuracy-based traffic
+    redirection among candidate ML models; latency appears only as a monitored model metric.
+    Seed's "accuracy/latency-based ML model selection" holds for accuracy, weak on latency
+    ([Google Patents](https://patents.google.com/patent/US11257002B2/en)).
+  - **US 11,461,300** (SAP, granted 2022-10-04) — "Dynamic model server for multi-model machine
+    learning inference services": claim 1 selects a model *server* based on the prediction
+    request (consistent hashing for cache locality, LRU cache management); nothing accuracy- or
+    latency-based. **Seed characterization not supported**
+    ([Google Patents](https://patents.google.com/patent/US11461300B2/en)).
+  - **US 2022/0004929 A1** (Google, published 2022-01-06, status pending as fetched) —
+    "On-Device Machine Learning Platform": spec assigns context features expiration periods,
+    with expired values deleted from stored training examples; claim text not retrievable from
+    the Google Patents page, so "stale-context expiration *before inference*" is unconfirmed at
+    claim level ([Google Patents](https://patents.google.com/patent/US20220004929A1/en)).
+  - **US 11,717,748 B2** (Valve, granted 2023-08-08) — "Latency compensation using
+    machine-learned prediction of user input": ML predicts a player's input so game control data
+    is generated ahead of receipt "to compensate for latency". **Seed characterization
+    confirmed** ([Google Patents](https://patents.google.com/patent/US11717748B2/en)).
+  - **US 9,679,003** (IBM, granted 2017-06-13) — "Rendezvous-based optimistic concurrency
+    control": OCC with the validate phase interleaved asynchronously with read/compute/write via
+    read subscriptions / write publications. **OCC characterization confirmed**
+    (concurrent-validation variant) ([Google Patents](https://patents.google.com/patent/US9679003B2/en)).
+  - **US 8,396,831** (Microsoft, granted 2013-03-12) — "Optimistic serializable snapshot
+    isolation": end-of-transaction read-set validation and phantom detection by re-scan over
+    timestamp-versioned records. **OCC-validation characterization confirmed**
+    ([Google Patents](https://patents.google.com/patent/US8396831B2/en)).
+  - **US 8,972,306** (Raytheon, granted 2015-03-03) — "System and method for sensor tasking":
+    claim 1 selects and schedules sensors from the state of a fuzzy cognitive map of
+    environmental conditions; value-based ranking (Real Options Theory + market-based auction)
+    appears only in dependent claim 7. Seed's "value-of-information sensor tasking" only
+    partially supported ([Google Patents](https://patents.google.com/patent/US8972306B2/en)).
+  - **EP 1,813,065 B1** (NXP, granted 2015-12-23) — "Device and method for event-triggered
+    communication between and among a plurality of nodes": event-notification messaging with
+    acknowledgment tracking between network nodes — event-triggered *networking*, not
+    event-triggered control/sampling in the Heemels/Tabuada sense
+    ([Google Patents](https://patents.google.com/patent/EP1813065B1/en)).
 - Seed survey's conclusion (recorded verbatim as its claim, not endorsed here): "Nothing found
   claiming ex-ante world-drift-priced admission of an LLM call with post-hoc generation
   validation." Caveats stated in the seed: keyword search is not a professional clearance
@@ -236,7 +274,8 @@ E4 suppression debt, E5 generation lease + landing validation?
 23. Win Fast or Lose Slow — https://arxiv.org/abs/2505.19481 · https://github.com/HaoKang-Timmy/LatencySensitiveBench
 24. Rational Metareasoning for LLMs — https://arxiv.org/pdf/2410.05563
 25. Dynamic Speculative Agent Planning — https://arxiv.org/pdf/2509.01920
-26. Faramesh — https://arxiv.org/abs/2601.17744 (abstract fetched 2026-07-23)
+26. Faramesh — https://arxiv.org/abs/2601.17744 · full text https://arxiv.org/html/2601.17744v1 (full text verified 2026-07-23)
 27. Agentic Plan Caching — https://arxiv.org/abs/2506.14852 ; AgenticCache — https://arxiv.org/abs/2604.24039 ; Continuum — https://arxiv.org/html/2511.02230v5
 28. US Patent 12,452,345 — https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12452345
 29. Seed document — PRIOR-ART.md, landfall repo root (deep-research sweep of 2026-07-23)
+30. Patent re-verification (claims fetched 2026-07-23) — https://patents.google.com/patent/US11257002B2/en · https://patents.google.com/patent/US11461300B2/en · https://patents.google.com/patent/US20220004929A1/en · https://patents.google.com/patent/US11717748B2/en · https://patents.google.com/patent/US9679003B2/en · https://patents.google.com/patent/US8396831B2/en · https://patents.google.com/patent/US8972306B2/en · https://patents.google.com/patent/EP1813065B1/en

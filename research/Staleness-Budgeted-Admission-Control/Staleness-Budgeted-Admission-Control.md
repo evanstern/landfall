@@ -61,10 +61,12 @@ any verdict on strategy (publication vs. patent) — that belongs in an analysis
 
 ## Open questions
 
-- Does Faramesh's full text support the seed survey's "oracle latency budgets + audited
-  fallback" characterization? The abstract does not ([[Converging-LLM-Agent-Literature]]).
-- The seed survey's patent list beyond US 12,452,345 is unverified here; a clearance search is
-  out of scope.
+- ~~Does Faramesh's full text support the seed survey's "oracle latency budgets + audited
+  fallback" characterization?~~ Resolved 2026-07-23: it does not — Faramesh is audit-plane
+  only ([[Converging-LLM-Agent-Literature]]).
+- ~~The seed survey's patent list beyond US 12,452,345 is unverified here.~~ Re-verified
+  against actual claims 2026-07-23 ([[Patent-Landscape]]); a clearance search remains out of
+  scope.
 - Peer-review status of the 2026 arXiv entries (ASSCG, Faramesh) is unknown.
 - Is there published work on *reproducible-from-recorded-fields* admission verdicts (the
   verdict-carries-arithmetic discipline) in any adjacent field? Nothing surfaced in this pass.
