@@ -10,9 +10,10 @@ related: [[Staleness-Budgeted-Admission-Control]]
 
 # Patent Landscape
 
-What the seed survey found in the patent literature, plus the one grant independently
-re-surfaced in this research pass. Research context, not legal advice; no professional
-clearance search has been done, and applications under 18 months old are invisible.
+What the seed survey found in the patent literature; every entry has since been re-verified
+against its actual claims (2026-07-23, TASK-2). Research context, not legal advice; no
+professional clearance search has been done, and applications under 18 months old are
+invisible.
 
 ## Nearest grants and applications
 
@@ -21,13 +22,24 @@ clearance search has been done, and applications under 18 months old are invisib
   centers may serve the request. Independently surfaced in this pass
   ([USPTO](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12452345);
   [[_grounding]] §patents).
-- Named by the seed survey (not re-verified here): US 11,257,002 / 11,461,300
-  (accuracy/latency-based ML model selection); US 2022/0004929 A1 (on-device ML with
-  stale-context expiration before inference); US 11,717,748 B2 (latency compensation via
-  prediction, games); US 9,679,003 / 8,396,831 (OCC validation); US 8,972,306
-  (value-of-information sensor tasking); EP 1,813,065 B1 (event-triggered communication).
+- Seed-survey list re-verified against actual claims 2026-07-23 ([[_grounding]] §patents):
+  - **Confirmed:** US 11,717,748 B2 (Valve — latency compensation via ML-predicted user input,
+    games); US 9,679,003 (IBM — rendezvous OCC, validation interleaved with read/compute/write);
+    US 8,396,831 (Microsoft — optimistic serializable snapshot isolation, read-set validation +
+    phantom re-scan).
+  - **Weaker than surveyed:** US 11,257,002 (Amazon — accuracy-based model deployment/routing;
+    latency only a monitored metric, not a selection basis); US 8,972,306 (Raytheon — claim 1 is
+    fuzzy-cognitive-map sensor selection; value-of-information enters only in dependent
+    claim 7); EP 1,813,065 B1 (NXP — event-notification messaging between network nodes:
+    event-triggered *networking*, not event-triggered control).
+  - **Not supported:** US 11,461,300 (SAP — claim 1 is consistent-hash model-*server* selection
+    for cache locality; nothing accuracy- or latency-based).
+  - **Unconfirmed at claim level:** US 2022/0004929 A1 (Google — spec applies context-feature
+    expiration to stored training examples; claims not retrievable, application pending as
+    fetched — "stale-context expiration before inference" unverified).
 - The seed survey states it found nothing claiming ex-ante world-drift-priced admission of an
-  LLM call combined with post-hoc generation validation ([[_grounding]] §patents).
+  LLM call combined with post-hoc generation validation ([[_grounding]] §patents); the
+  re-verification weakened several nearest neighbors, leaving that null result intact.
 
 ## The survey's patentability framing
 

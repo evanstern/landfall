@@ -37,10 +37,10 @@ five claimed elements:
 
 ## Open questions / flagged ambiguities
 
-- The seed survey's patent list (other than US 12,452,345) was not independently re-verified;
-  a professional clearance search remains out of scope.
-- Whether Faramesh's full text (beyond the abstract) supports the survey's "oracle latency
-  budgets + audited fallback policy" description is unresolved.
+- The seed survey's patent list was re-verified against actual claims on 2026-07-23
+  ([[_grounding]] §patents); a professional clearance search remains out of scope.
+- Resolved 2026-07-23: Faramesh's full text does **not** support the survey's "oracle latency
+  budgets + audited fallback policy" description ([[_grounding]] §converging).
 - arXiv IDs dated 2026 (ASSCG, Faramesh, others) are recent; their peer-review status is
   unknown.
 

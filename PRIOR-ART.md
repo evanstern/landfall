@@ -48,20 +48,40 @@ combination looks imminent.
 Also converging: "Win Fast or Lose Slow" ([2505.19481](https://arxiv.org/abs/2505.19481)),
 Rational Metareasoning for LLMs ([2410.05563](https://arxiv.org/abs/2410.05563)),
 Dynamic Speculative Agent Planning ([2509.01920](https://arxiv.org/pdf/2509.01920)),
-Faramesh ([2601.17744](https://arxiv.org/pdf/2601.17744) — oracle latency
-budgets + audited fallback policy). No literature hit for "cognition horizon"
-in this sense.
+Faramesh ([2601.17744](https://arxiv.org/pdf/2601.17744) — pre-execution
+action authorization issuing PERMIT/DEFER/DENY with append-only provenance
+logs; full text verified 2026-07-23: contains **no** latency budgets and no
+fallback policy — an earlier draft of this survey mischaracterized it as
+"oracle latency budgets + audited fallback"; it is adjacent on the audit
+plane only, and names decision-to-execution staleness as a limitation it
+does not address). No literature hit for "cognition horizon" in this sense.
 
 ## Patent landscape (nearest found)
 
-US 12,452,345 (latency-budgeted routing of AI inference to external models);
-US 11,257,002 / 11,461,300 (accuracy/latency-based ML model selection);
-US 2022/0004929 A1 (on-device ML with stale-context expiration before
-inference); US 11,717,748 B2 (latency compensation via prediction, games);
-US 9,679,003 / 8,396,831 (OCC validation); US 8,972,306 (value-of-information
-sensor tasking); EP 1,813,065 B1 (event-triggered communication). **Nothing
-found claiming ex-ante world-drift-priced admission of an LLM call with
-post-hoc generation validation.**
+Every entry re-verified against its actual claims 2026-07-23 (Google
+Patents); corrections to the original sweep noted inline:
+
+US 12,452,345 (latency-budgeted routing of AI inference to external models;
+verified against the USPTO grant); US 11,717,748 B2 (latency compensation
+via ML-predicted user input, games — confirmed); US 9,679,003 (rendezvous
+OCC, validation interleaved with read/compute/write — confirmed) and
+US 8,396,831 (optimistic serializable snapshot isolation, read-set
+validation + phantom re-scan — confirmed); US 11,257,002 (accuracy-based
+model deployment/routing; latency is only a monitored metric, not a
+selection basis — weaker than originally surveyed); US 8,972,306 (claim 1
+is fuzzy-cognitive-map sensor selection; value-of-information enters only
+in dependent claim 7 — weaker than surveyed); EP 1,813,065 B1
+(event-notification messaging with acknowledgment tracking between network
+nodes — event-triggered *networking*, not event-triggered control; adjacent
+in name only); US 11,461,300 (**miscited**: consistent-hash model-server
+selection for cache locality; nothing accuracy- or latency-based in
+claim 1); US 2022/0004929 A1 (spec gives context features expiration
+periods applied to stored training examples; claims not retrievable and
+application still pending — "stale-context expiration before inference"
+unconfirmed at claim level). **Nothing found claiming ex-ante
+world-drift-priced admission of an LLM call with post-hoc generation
+validation** — re-verification weakened several of the nearest neighbors,
+so the null result stands stronger than first recorded.
 
 ## Patentability read
 
