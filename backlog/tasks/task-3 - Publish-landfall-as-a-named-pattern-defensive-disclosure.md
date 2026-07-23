@@ -1,9 +1,10 @@
 ---
 id: TASK-3
 title: Publish landfall as a named pattern (defensive disclosure)
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-07-23 04:28'
+updated_date: '2026-07-23 04:54'
 labels: []
 dependencies:
   - TASK-1
@@ -27,3 +28,12 @@ Derived from Analysis-Using-The-Prior-Art. The corpus shows every element indivi
 - [ ] #2 Write-up cites the prior-art lineage and states the deterministic-auditable differentiator
 - [ ] #3 Publish/no-patent decision is recorded in the repo (PRIOR-ART.md or DESIGN.md)
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Write PATTERN.md: self-contained, citable defensive disclosure naming the pattern (Landfall — staleness-budgeted admission control) and its five elements (E1 ex-ante drift gate, E2 shape×host latency factoring, E3 declared degrade taxonomy, E4 suppression debt, E5 lease + landing validation). Cites the prior-art lineage (Boddy & Dean, Russell & Wefald, Sun/Polyanskiy/Uysal, Ornee & Sun, AoII, Neely, OCC/TL2/leases) and states the deterministic-auditable differentiator vs learned gates. Urgency/convergence argument leans on RRARA + Win Fast or Lose Slow (NeurIPS 2025) + plan caching + older literature per task guidance; fragile 2026 arXiv entries mentioned only with caveats. Includes explicit defensive-publication statement and a how-to-cite block (public GitHub repo = public + citable).
+2. Record the publish/no-patent decision as a dated Decision section in PRIOR-ART.md.
+3. Link PATTERN.md from README.
+4. go test -race ./... (doctrine), one branch task-3-defensive-disclosure, one PR.
+<!-- SECTION:PLAN:END -->

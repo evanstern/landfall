@@ -46,6 +46,11 @@ allowed at the current sim speed, based on how stale its answer will be when
 it lands. See [DESIGN.md](DESIGN.md) for the full design, what the source
 implementation taught, invariants, and open questions.
 
+The pattern itself is named and published as a defensive disclosure in
+[PATTERN.md](PATTERN.md) — the citable write-up: five elements, lineage,
+and the deterministic-auditable differentiator. The prior-art survey and
+the publish/no-patent decision live in [PRIOR-ART.md](PRIOR-ART.md).
+
 Status: planted 2026-07-23. Core gate + lease + estimator implemented and
 tested (`go test -race ./...`); velocity-estimator helpers and worked
 examples not yet.
